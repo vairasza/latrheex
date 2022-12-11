@@ -24,9 +24,6 @@
           value: "en",
           text: "🇬🇧 English",
         },
-      });
-
-      chrome.storage.sync.set({
         tl: {
           value: "ja",
           text: "🇯🇵 Japanese",
