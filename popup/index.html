@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Document</title>
+</head>
+<body>
+    <div class="wrapper">
+
+        <h3>1) Select Source or Target Language:</h3>
+
+        <span class="extra-button" id="reset-button">🗑</span>
+
+        <p>Source Language: <button class="language-button" id="output-sl">keine ausgewählt</button></p>
+        <p>Target Language: <button class="language-button" id="output-tl">keine ausgewählt</button></p>
+    
+        <h3>2) Set Language:</h3>
+        <div id="languages">
+            <ul>
+                <button class="language-button" value="zh">🇨🇳 Chinese</button>
+                <button class="language-button" value="en">🇬🇧 English</button>
+                <button class="language-button" value="fr">🇫🇷 French</button>
+                <button class="language-button" value="de">🇩🇪 German</button>
+                <button class="language-button" value="it">🇮🇹 Italian</button>
+            </ul>
+            <ul>
+                <button class="language-button" value="ko">🇰🇷 South Korea</button>
+                <button class="language-button" value="ja">🇯🇵 Japanese</button>
+                <button class="language-button" value="pt">🇵🇹 Portuguese</button>
+                <button class="language-button" value="ru">🇷🇺 Russian</button>
+                <button class="language-button" value="es">🇪🇸 Spanish</button>
+            </ul>
+        </div>
+        
+        <p id="error-text"></p>
+
+        <script src="index.js"></script>
+    </div>
+</body>
+</html>

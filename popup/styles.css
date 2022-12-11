@@ -1,0 +1,105 @@
+body {
+  margin: 0;
+}
+
+.wrapper {
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 400px;
+  height: 450px;
+  overflow: auto;
+}
+
+#error-text {
+  font-weight: bold;
+  color: red;
+}
+
+li {
+  list-style: none;
+  padding: 5px;
+  font-size: 14px;
+}
+
+li:hover {
+  background-color: rgba(51, 51, 51, 0.2);
+  cursor: pointer;
+}
+
+#languages-container {
+  position: relative;
+}
+
+#languages {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+ul {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0;
+}
+
+/* CSS */
+button {
+  border-radius: 8px;
+  border-width: 0;
+  color: #333333;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 10px 12px;
+  text-align: center;
+  transition: all 200ms;
+  vertical-align: baseline;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.language-button-list {
+  background-color: white;
+}
+
+.language-button-list:hover {
+  background-color: rgba(51, 51, 51, 0);
+}
+
+.language-button {
+  background-color: rgba(55, 55, 55, 0.1);
+  width: 150px;
+}
+
+.language-button:hover {
+  background-color: rgba(51, 51, 51, 0.5);
+}
+
+.language-button-list:hover {
+  background-color: rgba(51, 51, 51, 0.5);
+}
+
+.selected {
+  background-color: rgba(54, 145, 101, 0.8);
+}
+
+.extra-button {
+  position: absolute;
+  top: 5%;
+  right: 5%;
+  padding: 2%;
+  border-radius: 8px;
+}
+
+.extra-button:hover {
+  background-color: rgba(51, 51, 51, 0.2);
+  cursor: pointer;
+}

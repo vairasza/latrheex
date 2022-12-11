@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Language Translation Helper",
+  "description": "Find translations for selected words in google translate, deepl and custom dictionaries.",
+  "version": "1.0",
+  "icons": {
+    "16": "assets/icon.png",
+    "32": "assets/icon.png",
+    "64": "assets/icon.png"
+  },
+  "background": {
+    "service_worker": "background/index.js"
+  },
+  "permissions": ["activeTab", "scripting", "tabs", "contextMenus", "storage"],
+  "action": {
+    "default_title": "Language Translation Helper",
+    "default_popup": "popup/index.html"
+  },
+  "commands": {}
+}
