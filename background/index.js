@@ -37,18 +37,20 @@
     const slVal = await chrome.storage.sync.get("sl");
     const tlVal = await chrome.storage.sync.get("tl");
 
-    chrome.contextMenus.create({
-      id: `deepl/${slVal.sl.value}/${tlVal.tl.value}`,
-      title: `${slVal.sl.text} => ${tlVal.tl.text}`,
-      contexts: ["selection"],
-    });
-    chrome.contextMenus.create({
-      id: `deepl/${tlVal.tl.value}/${slVal.sl.value}`,
-      title: `${tlVal.tl.text} => ${slVal.sl.text}`,
-      contexts: ["selection"],
-    });
+    if (slVal.sl && tlVal.tl) {
+      chrome.contextMenus.create({
+        id: `deepl/${slVal.sl.value}/${tlVal.tl.value}`,
+        title: `${slVal.sl.text} => ${tlVal.tl.text}`,
+        contexts: ["selection"],
+      });
+      chrome.contextMenus.create({
+        id: `deepl/${tlVal.tl.value}/${slVal.sl.value}`,
+        title: `${tlVal.tl.text} => ${slVal.sl.text}`,
+        contexts: ["selection"],
+      });
 
-    console.log("Language Translation Helper -- context menus created");
+      console.log("Language Translation Helper -- context menus created");
+    }
   }
 
   function resetContextMenu() {
