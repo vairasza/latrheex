@@ -16,5 +16,11 @@
     "default_title": "Language Translation Helper",
     "default_popup": "popup/index.html"
   },
-  "commands": {}
+  "commands": {},
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_script.js"]
+    }
+  ]
 }

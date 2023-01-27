@@ -1,4 +1,17 @@
 (async function () {
+  const languages = {
+    zh: "🇨🇳 Chinese",
+    en: "🇬🇧 English",
+    fr: "🇫🇷 French",
+    de: "🇩🇪 German",
+    it: "🇮🇹 Italian",
+    ko: "🇰🇷 South Korea",
+    ja: "🇯🇵 Japanese",
+    pt: "🇵🇹 Portuguese",
+    ru: "🇷🇺 Russian",
+    es: "🇪🇸 Spanish",
+  };
+
   class Storage {
     async getLanguageSettings() {
       const slLang = await chrome.storage.sync.get("sl");
@@ -10,6 +23,7 @@
     }
 
     saveLanguageSettings(key, event) {
+      console.log(key);
       chrome.storage.sync.set({
         [key]: {
           value: event.target.getAttribute("value"),
@@ -22,11 +36,11 @@
       chrome.storage.sync.set({
         sl: {
           value: "en",
-          text: "🇬🇧 English",
+          text: languages.en,
         },
         tl: {
           value: "ja",
-          text: "🇯🇵 Japanese",
+          text: languages.ja,
         },
       });
     }
@@ -36,32 +50,28 @@
     constructor(storage) {
       this.storage = storage;
 
-      this.langList = document.getElementById("languages");
-      this.slElement = document.getElementById("output-sl");
-      this.tlElement = document.getElementById("output-tl");
-      this.errorText = document.getElementById("error-text");
+      this.currentOutput = null;
+
       this.clearButton = document.querySelector("#reset-button");
+      this.langSource = document.getElementById("language-sl");
+      this.langListSource = document.getElementById("languages-list-source");
+      //this.langTarget = document.getElementById("language-tl"); // is list!!!
+      //this.langListTarget = document.getElementById("languages-list-target");
+      this.langListRender = document.querySelectorAll(
+        ".language-button-render"
+      );
+      this.errorText = document.getElementById("error-text");
 
-      this.clearCurrentOutput();
-
-      this.slElement.addEventListener("click", () => {
-        this.currentOutput = this.slElement;
-        this.setSlHighlight();
-        this.showLanguageList();
+      this.langSource.addEventListener("click", () => {
+        this.currentOutput = this.langSource;
+        this.highlightSourceLanguage();
+        this.renderLanguageList();
       });
 
-      this.tlElement.addEventListener("click", () => {
-        this.currentOutput = this.tlElement;
-        this.setTlHighlight();
-        this.showLanguageList();
-      });
-
-      for (const child of this.langList.children) {
-        child.addEventListener(
-          "click",
-          this.languageListChildrenCallback.bind(this)
-        );
-      }
+      /*this.langTarget.addEventListener("click", () => {
+        this.currentOutput = this.langTarget;
+        this.highlightTargetLanguage();
+      });*/
 
       this.clearButton.addEventListener(
         "click",
@@ -69,36 +79,68 @@
       );
     }
 
-    setTlHighlight() {
-      this.tlElement.classList.add("selected");
+    //render only once, need to delete language list!
+    //be aware of already selected languages
+    renderLanguageList() {
+      const l = document.createElement("div");
+      l.style.cssText = "display: flex;";
+
+      let text = "";
+      let counter = 0;
+      for (let [key, val] of Object.entries(languages)) {
+        console.log(key, val);
+        if (counter === Object.keys(languages).length / 2) {
+          text += `</ul><ul>`;
+        }
+        text += `<button class="language-button-render" value="${key}">${val}</button>`;
+        counter++;
+      }
+
+      l.innerHTML = `<ul>${text}</ul>`;
+      this.langListSource.appendChild(l);
+      this.addListenerLanguageList();
     }
 
-    setSlHighlight() {
-      this.slElement.classList.add("selected");
+    removeLanguageList() {
+      this.langListSource.innerHTML = null;
+    }
+
+    addListenerLanguageList() {
+      this.langListRender = document.querySelectorAll(
+        ".language-button-render"
+      );
+      this.langListRender.forEach((l) => {
+        l.addEventListener("click", (event) => {
+          this.setSlText(event.target.innerText);
+          this.removeLanguageList();
+          const key = this.currentOutput.id === "language-sl" ? "sl" : "tl";
+          this.storage.saveLanguageSettings(key, event);
+        });
+      });
+    }
+
+    highlightTargetLanguage() {
+      this.langTarget.classList.add("selected");
+    }
+
+    highlightSourceLanguage() {
+      this.langSource.classList.add("selected");
     }
 
     removeTlHighlight() {
-      this.tlElement.classList.remove("selected");
+      this.langTarget.classList.remove("selected");
     }
 
     removeSlHighlight() {
-      this.slElement.classList.remove("selected");
-    }
-
-    hideLanguageList() {
-      this.langList.hidden = true;
-    }
-
-    showLanguageList() {
-      this.langList.hidden = false;
+      this.langSource.classList.remove("selected");
     }
 
     setSlText(text) {
-      this.slElement.innerText = text;
+      this.langSource.innerText = text;
     }
 
     setTlText(text) {
-      this.tlElement.innerText = text;
+      this.langTarget.innerText = text;
     }
 
     setCurrentOutputText(element) {

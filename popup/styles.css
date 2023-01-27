@@ -91,15 +91,30 @@ button {
   background-color: rgba(54, 145, 101, 0.8);
 }
 
-.extra-button {
+.icon-bin {
   position: absolute;
-  top: 5%;
+  width: 25px;
+  height: 25px;
+  top: 3.5%;
   right: 5%;
-  padding: 2%;
   border-radius: 8px;
+  background: none;
+  margin: 0;
+  padding: 0;
 }
 
-.extra-button:hover {
+.icon-bin:hover {
   background-color: rgba(51, 51, 51, 0.2);
   cursor: pointer;
+}
+
+.pic {
+  width: 15px;
+  height: 15px;
+  padding: 5px;
+}
+
+#languages-list-source {
+  display: flex;
+  flex-direction: column;
 }

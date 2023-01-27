@@ -1,5 +1,5 @@
 (async function () {
-  const configuration = {
+  const tools = {
     google: {
       title: "google",
       url: "https://translate.google.com/?sl={sl}&tl={tl}&text={text}&op=translate",
@@ -16,20 +16,6 @@
       support: ["ja"],
     },
   };
-  /*
-  const languages = {
-    chinese: { value: "zh", text: "🇨🇳 Chinese" },
-    english: { value: "en", text: "🇬🇧 English" },
-    french: { value: "fr", text: "🇫🇷 French" },
-    german: { value: "de", text: "🇩🇪 German" },
-    italian: { value: "it", text: "🇮🇹 Italian" },
-    south_korean: { value: "ko", text: "🇰🇷 South Korea" },
-    japanese: { value: "ja", text: "🇯🇵 Japanese" },
-    portuguese: { value: "pt", text: "🇵🇹 Portuguese" },
-    russian: { value: "ru", text: "🇷🇺 Russian" },
-    spanish: { value: "es", text: "🇪🇸 Spanish" },
-  };
-  */
 
   async function registerContextMenu() {
     console.log("Language Translation Helper -- registering context menus");
@@ -57,8 +43,22 @@
     chrome.contextMenus.removeAll();
   }
 
+  function resetLanguageSettings() {
+    chrome.storage.sync.set({
+      sl: {
+        value: "en",
+        text: "🇬🇧 English",
+      },
+      tl: {
+        value: "ja",
+        text: "🇯🇵 Japanese",
+      },
+    });
+  }
+
   chrome.runtime.onInstalled.addListener(() => {
     resetContextMenu();
+    resetLanguageSettings();
     registerContextMenu();
   });
 
@@ -67,15 +67,21 @@
     registerContextMenu();
   });
 
-  chrome.contextMenus.onClicked.addListener((info) => {
+  chrome.contextMenus.onClicked.addListener(async (info) => {
     const [id, sl, tl] = info.menuItemId.split("/");
-    const url = configuration[id].url;
+    //const url = configuration[id].url;
 
-    chrome.tabs.create({
-      url: url
-        .replace("{text}", info.selectionText)
-        .replace("{sl}", sl)
-        .replace("{tl}", tl),
+    const currentTab = await chrome.tabs.query({
+      active: true,
+      lastFocusedWindow: true,
+    });
+
+    //do not need text info, just info from storage
+    chrome.tabs.sendMessage(currentTab[0].id, {
+      id: id,
+      sl: sl,
+      tl: tl,
+      txt: info.selectionText,
     });
   });
 })();
