@@ -6,7 +6,7 @@ body {
   padding-left: 10px;
   padding-right: 10px;
   width: 400px;
-  height: 450px;
+  height: 520px;
   overflow: auto;
 }
 
@@ -116,5 +116,12 @@ button {
 
 #languages-list-source {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+#languages-list-target {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }

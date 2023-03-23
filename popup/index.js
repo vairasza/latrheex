@@ -1,29 +1,15 @@
 (async function () {
-  const languages = {
-    zh: "🇨🇳 Chinese",
-    en: "🇬🇧 English",
-    fr: "🇫🇷 French",
-    de: "🇩🇪 German",
-    it: "🇮🇹 Italian",
-    ko: "🇰🇷 South Korea",
-    ja: "🇯🇵 Japanese",
-    pt: "🇵🇹 Portuguese",
-    ru: "🇷🇺 Russian",
-    es: "🇪🇸 Spanish",
-  };
-
   class Storage {
     async getLanguageSettings() {
       const slLang = await chrome.storage.sync.get("sl");
       const tlLang = await chrome.storage.sync.get("tl");
       return {
-        sl: slLang.sl ? slLang.sl.text : "not chosen",
-        tl: tlLang.tl ? tlLang.tl.text : "not chosen",
+        sl: slLang.sl?.text ?? "not chosen",
+        tl: tlLang.tl?.text ?? "not chosen",
       };
     }
 
     saveLanguageSettings(key, event) {
-      console.log(key);
       chrome.storage.sync.set({
         [key]: {
           value: event.target.getAttribute("value"),
@@ -36,11 +22,11 @@
       chrome.storage.sync.set({
         sl: {
           value: "en",
-          text: languages.en,
+          text: "🇬🇧 English",
         },
         tl: {
           value: "ja",
-          text: languages.ja,
+          text: "🇯🇵 Japanese",
         },
       });
     }
@@ -53,114 +39,110 @@
       this.currentOutput = null;
 
       this.clearButton = document.querySelector("#reset-button");
-      this.langSource = document.getElementById("language-sl");
-      this.langListSource = document.getElementById("languages-list-source");
-      //this.langTarget = document.getElementById("language-tl"); // is list!!!
-      //this.langListTarget = document.getElementById("languages-list-target");
-      this.langListRender = document.querySelectorAll(
-        ".language-button-render"
-      );
-      this.errorText = document.getElementById("error-text");
-
-      this.langSource.addEventListener("click", () => {
-        this.currentOutput = this.langSource;
-        this.highlightSourceLanguage();
-        this.renderLanguageList();
-      });
-
-      /*this.langTarget.addEventListener("click", () => {
-        this.currentOutput = this.langTarget;
-        this.highlightTargetLanguage();
-      });*/
-
       this.clearButton.addEventListener(
         "click",
         this.resetLanguages.bind(this)
       );
-    }
 
-    //render only once, need to delete language list!
-    //be aware of already selected languages
-    renderLanguageList() {
-      const l = document.createElement("div");
-      l.style.cssText = "display: flex;";
-
-      let text = "";
-      let counter = 0;
-      for (let [key, val] of Object.entries(languages)) {
-        console.log(key, val);
-        if (counter === Object.keys(languages).length / 2) {
-          text += `</ul><ul>`;
-        }
-        text += `<button class="language-button-render" value="${key}">${val}</button>`;
-        counter++;
-      }
-
-      l.innerHTML = `<ul>${text}</ul>`;
-      this.langListSource.appendChild(l);
-      this.addListenerLanguageList();
-    }
-
-    removeLanguageList() {
-      this.langListSource.innerHTML = null;
-    }
-
-    addListenerLanguageList() {
-      this.langListRender = document.querySelectorAll(
-        ".language-button-render"
+      this.langListSource = Array.from(
+        document.getElementById("languages-list-source").children
       );
-      this.langListRender.forEach((l) => {
-        l.addEventListener("click", (event) => {
-          this.setSlText(event.target.innerText);
-          this.removeLanguageList();
-          const key = this.currentOutput.id === "language-sl" ? "sl" : "tl";
-          this.storage.saveLanguageSettings(key, event);
-        });
+      this.langListSource.forEach((element) => {
+        element.addEventListener("click", (event) =>
+          this.toggleHighlight("sl", event)
+        );
+      });
+
+      this.langListTarget = Array.from(
+        document.getElementById("languages-list-target").children
+      );
+      this.langListTarget.forEach((element) => {
+        element.addEventListener("click", (event) =>
+          this.toggleHighlight("tl", event)
+        );
+      });
+
+      this.errorText = document.getElementById("error-text");
+    }
+
+    async init() {
+      const { sl, tl } = await this.storage.getLanguageSettings();
+
+      this.langListSource.forEach((element) => {
+        if (element.innerText === sl) {
+          element.classList.add("selected");
+        }
+      });
+
+      this.langListTarget.forEach((element) => {
+        if (element.innerText === tl) {
+          element.classList.add("selected");
+        }
       });
     }
 
-    highlightTargetLanguage() {
-      this.langTarget.classList.add("selected");
+    toggleHighlight(key, event) {
+      if (event.target.classList.contains("selected")) return;
+      if (this.checkSameLanguage(key, event)) {
+        this.showErrorText();
+        return;
+      }
+
+      this.clearSelection(key);
+      event.target.classList.add("selected");
+      this.storage.saveLanguageSettings(key, event);
     }
 
-    highlightSourceLanguage() {
-      this.langSource.classList.add("selected");
+    checkSameLanguage(key, event) {
+      if (key === "sl") {
+        return this.langListTarget.some((element) => {
+          return (
+            element.classList.contains("selected") &&
+            element.innerText === event.target.innerText
+          );
+        });
+      }
+
+      if (key === "tl") {
+        return this.langListSource.some((element) => {
+          return (
+            element.classList.contains("selected") &&
+            element.innerText === event.target.innerText
+          );
+        });
+      }
+
+      return false;
     }
 
-    removeTlHighlight() {
-      this.langTarget.classList.remove("selected");
-    }
-
-    removeSlHighlight() {
-      this.langSource.classList.remove("selected");
-    }
-
-    setSlText(text) {
-      this.langSource.innerText = text;
-    }
-
-    setTlText(text) {
-      this.langTarget.innerText = text;
-    }
-
-    setCurrentOutputText(element) {
-      this.currentOutput.innerText = element;
-    }
-
-    clearCurrentOutput() {
-      this.currentOutput = null;
-    }
-
-    currentOutputNotNull() {
-      return this.currentOutput !== null;
+    clearSelection(key) {
+      if (key === "sl") {
+        this.langListSource.forEach((element) => {
+          element.classList.remove("selected");
+        });
+      } else {
+        this.langListTarget.forEach((element) => {
+          element.classList.remove("selected");
+        });
+      }
     }
 
     resetLanguages() {
-      this.setSlText("🇬🇧 English");
-      this.setTlText("🇯🇵 Japanese");
-      this.removeSlHighlight();
-      this.removeTlHighlight();
-      this.clearCurrentOutput();
+      this.clearSelection("sl");
+      this.clearSelection("tl");
+
+      this.langListSource.forEach((element) => {
+        if (element.value === "en") {
+          element.classList.add("selected");
+        }
+      });
+
+      this.langListTarget.forEach((element) => {
+        if (element.value === "ja") {
+          element.classList.add("selected");
+        }
+      });
+
       this.storage.resetLanguageSettings();
     }
 
@@ -171,41 +153,10 @@
         this.errorText.innerText = null;
       }, 3000);
     }
-
-    checkSameLanguage(event) {
-      return (
-        (this.currentOutput.id !== this.slElement.id &&
-          event.target.innerText === this.slElement.innerText) ||
-        (this.currentOutput.id !== this.tlElement.id &&
-          event.target.innerText === this.tlElement.innerText)
-      );
-    }
-
-    languageListChildrenCallback(event) {
-      this.removeSlHighlight();
-      this.removeTlHighlight();
-
-      if (!this.currentOutputNotNull()) return;
-      if (this.checkSameLanguage(event)) {
-        this.hideLanguageList();
-        this.showErrorText();
-        return;
-      }
-
-      this.setCurrentOutputText(event.target.innerText);
-      const key = this.currentOutput.id === "output-sl" ? "sl" : "tl";
-
-      this.storage.saveLanguageSettings(key, event);
-
-      this.clearCurrentOutput();
-      this.hideLanguageList();
-    }
   }
 
   const storage = new Storage();
-  const elements = new Elements(storage);
+  const element = new Elements(storage);
 
-  const { sl, tl } = await storage.getLanguageSettings();
-  elements.setSlText(sl);
-  elements.setTlText(tl);
+  element.init();
 })();
