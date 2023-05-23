@@ -1,22 +1,4 @@
 (async function () {
-  const tools = {
-    google: {
-      title: "google",
-      url: "https://translate.google.com/?sl={sl}&tl={tl}&text={text}&op=translate",
-      support: ["zh", "en", "fr", "de", "it", "ko", "ja", "pt", "ru", "es"],
-    },
-    deepl: {
-      title: "deepl",
-      url: "https://www.deepl.com/translator#{sl}/{tl}/{text}",
-      support: ["zh", "en", "fr", "de", "it", "ko", "ja", "pt", "ru", "es"],
-    },
-    jisho: {
-      title: "jisho",
-      url: "https://jisho.org/search/{text}",
-      support: ["ja"],
-    },
-  };
-
   async function registerContextMenu() {
     console.log("Language Translation Helper -- registering context menus");
 
@@ -69,19 +51,25 @@
 
   chrome.contextMenus.onClicked.addListener(async (info) => {
     const [id, sl, tl] = info.menuItemId.split("/");
-    //const url = configuration[id].url;
 
     const currentTab = await chrome.tabs.query({
       active: true,
       lastFocusedWindow: true,
     });
 
-    //do not need text info, just info from storage
+    const response = await fetch(
+      `http://localhost:8000?sl=${sl}&tl=${tl}&text=${info.selectionText}`
+    );
+
+    const json = await response.json();
+
+    //need server that makes a request to deepl
     chrome.tabs.sendMessage(currentTab[0].id, {
       id: id,
       sl: sl,
       tl: tl,
-      txt: info.selectionText,
+      originalText: info.selectionText,
+      translatedText: json.translation.translations[0].text,
     });
   });
 })();

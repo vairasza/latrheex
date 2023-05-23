@@ -1,50 +1,123 @@
-let inject = null;
+(function () {
+  const languages = [
+    { value: "zh", output: "🇨🇳 Chinese" },
+    { value: "en", output: "🇬🇧 English" },
+    { value: "fr", output: "🇫🇷 French" },
+    { value: "de", output: "🇩🇪 German" },
+    { value: "it", output: "🇮🇹 Italian" },
+    { value: "ko", output: "🇰🇷 South Korean" },
+    { value: "ja", output: "🇯🇵 Japanese" },
+    { value: "es", output: "🇪🇸 Spanish" },
+  ];
 
-chrome.runtime.onMessage.addListener((request, sender) => {
-  console.log(sender, request);
-  console.log(window.getSelection());
+  const translateLanguage = (value, languages) => {
+    const find = languages.filter((el) => {
+      if (el.value === value) {
+        return el.output;
+      }
+    });
 
-  const r = window.getSelection().getRangeAt(0).getClientRects()[0];
+    if (find.length !== 1) {
+      return "not found";
+    }
+    return find[0].output;
+  };
 
-  inject = document.createElement("div");
-  inject.id = "trallala";
-  inject.textContent = "test";
-  //calc height; put it to the right or bottom if there is not enough place
-  inject.style.cssText = `background-color: rgb(150,150,150);
-  position: absolute;
-  left: ${r.x + 10}px;
-  top: ${r.y - 80}px;
-  width: 200px;
-  height: 70px;
-  z-index: 20;`;
-  document.body.appendChild(inject);
-});
+  /*
+    request {
+      id: string
+      sl: string - source language
+      tl: string - target language
+      originalText: string - selected text from user
+      translatedText: string - translated text for user
+    }
+    => example {
+      id: 'deepl',
+      sl: 'ja',
+      tl: 'en',
+      originalText: 'こんにちは'.
+      translatedText: 'Good Day'
+    }
+  */
+  chrome.runtime.onMessage.addListener((request) => {
+    const htmlToInject = `
+      <div id="latrheex-box"
+        style="
+          background-color:gray;
+          position: fixed;
+          right: 10px;
+          bottom: 10px;
+          width: 450px;
+          height: auto;
+          z-index: 200;
+          font-family: Verdana, Geneva, Tahoma, sans-serif;
+          color: black;
+          padding: 5px;
+        ">
+        <div
+          style="
+            font-size: medium;
+            font-style: italic;
+            display:flex;
+            flex-direction: col;
+            margin-bottom: 10px;
+          ">
+          <span
+            style="
+              flex-grow: 1;
+              margin:auto;
+              padding-left: 5px;
+            ">
+              Translation from ${translateLanguage(
+                request.sl,
+                languages
+              )} to ${translateLanguage(request.tl, languages)}
+          </span>
+          <div>
+            <button
+              id="latrheex-button"
+              style="
+                margin: 3px;
+              ">
+              x
+            </button>
+          </div>
+        </div>
+        <div
+          style="
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction:
+            column;
+          ">
+          <div
+            style="
+              font-size: small;
+              margin-bottom: 5px;
+            ">
+            ${request.originalText}
+          </div>
+          <div
+            style="
+              font-size: medium;
+              margin-bottom: 5px;
+            ">
+            =>
+          </div>
+          <div
+            style="
+              font-size: small;
+            ">
+            ${request.translatedText}
+          </div>
+        </div>
+      </div>`;
+    document.body.insertAdjacentHTML("beforeend", htmlToInject);
 
-function getSelectionCoords(atStart) {
-  const sel = window.getSelection();
+    const box = document.getElementById("latrheex-box");
+    const button = document.getElementById("latrheex-button");
 
-  // check if selection exists
-  if (!sel.rangeCount) return null;
-
-  // get range
-  let range = sel.getRangeAt(0).cloneRange();
-  if (!range.getClientRects) return null;
-
-  // get client rect
-  range.collapse(atStart);
-  let rects = range.getClientRects();
-  if (rects.length <= 0) return null;
-
-  // return coord
-  let rect = rects[0];
-  return { x: rect.x, y: rect.y };
-}
-
-document.addEventListener(
-  "scroll",
-  () => {
-    let d = document.getElementById("trallala");
-    if (d !== null) d.remove();
-  },
-  true
-);
+    button.addEventListener("click", () => box.remove());
+  });
+})();
