@@ -83,6 +83,11 @@
             </button>
           </div>
         </div>
+        <div>
+          <a href="https://jisho.org/search/${
+            request.originalText
+          }" target="_blank">jisho link</a>
+        </div>
         <div
           style="
             overflow-y: auto;
